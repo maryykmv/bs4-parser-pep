@@ -47,6 +47,19 @@ def file_output(results, cli_args):
     # RESULTS_DIR.mkdir(exist_ok=True)
     # archive_path = RESULTS_DIR / filename
     parser_mode = cli_args.mode
+    # Не могу изменить на контсанту тесты падают: пока
+    # сюда дойдет пройдут секунды
+    # из-за этого падают тесты
+    # E       AssertionError: Убедитесь что имя файла соотвествует
+    # паттерну <имя-режима_дата_в_формате_%Y-%m-%d_%H-%M-%S>.csv
+    # E         С форматами кодов вы можете познакомиться тут -
+    # E https://docs.python.org/3/library/datetime.html?highlight=strftime
+    # #strftime-and-strptime-format-codes
+    # E assert 'pep_2023-09-10_01-20-27.csv' == 'pep_2023-09-10_01-20-33.csv'
+    # E - pep_2023-09-10_01-20-33.csv
+    # E ?                      ^^
+    # E + pep_2023-09-10_01-20-27.csv
+    # E ?
     now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
     file_name = f'{parser_mode}_{now_formatted}.csv'
     file_path = results_dir / file_name
