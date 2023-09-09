@@ -1,5 +1,6 @@
 import logging
 import re
+from collections import Counter
 from urllib.parse import urljoin
 
 import requests_cache
@@ -7,7 +8,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
-from constants import BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL
+from constants import BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL, EXPECTED_STATUS, ERROR_MESSAGE
 from outputs import control_output
 from utils import get_response, find_tag
 
@@ -40,7 +41,7 @@ def whats_new(session):
 
     # Печать найденных элементов.
     # results = []
-    results = [('Ссылка на статью', 'Заголовок', 'Редактор, автор')]
+    results = [('Ссылка на статью', 'Заголовок', 'Редактор, Автор')]
     for section in tqdm(sections_by_python):
         version_a_tag = find_tag(section, 'a')
         href = version_a_tag['href']
@@ -100,7 +101,37 @@ def pep(session):
         return
     soup = BeautifulSoup(response.text, 'lxml')
     main_div = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
-    print(main_div)
+    a_tags = main_div.find_all('a', attrs={'class': 'pep reference internal'})
+    # print(a_tags)
+    # print(abbr_tags)
+    results = [('Статус', 'Количество')]
+    statuses = []
+    for a_tag in a_tags:
+        link = a_tag['href']
+        # print(link)
+        pep_url = urljoin(PEP_DOC_URL, link)
+        # print(pep_url)
+        response = get_response(session, pep_url)
+        if response is None:
+            return
+        soup = BeautifulSoup(response.text, 'lxml')
+        abbr_tags = find_tag(soup, 'abbr')
+        status = abbr_tags.text
+        preview_status = status[0]
+        # print(preview_status)
+        if status not in EXPECTED_STATUS[preview_status]:
+            error_message = ERROR_MESSAGE.format(
+                pep_url=pep_url,
+                status=status,
+                expected_status=EXPECTED_STATUS[preview_status]
+            )
+            logging.warning(error_message)
+        statuses.append(status)
+    counter = Counter(statuses)
+    # print(counter)
+    for status, count in counter.items():
+        results.append((status, count))
+    return results
 
 
 def download(session):
