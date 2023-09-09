@@ -110,16 +110,8 @@ def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
     response = get_response(session, downloads_url)
     soup = get_soup(session, downloads_url)
-    # file_name = re.compile(r'.+pdf-a4\.zip$')
-    # pdf_a4_link = soup.select_one(
-    # f'div.main table.docutils > [href$={file_name}]'
-    # )['href']
-    main_div = find_tag(soup, 'div', attrs={'role': 'main'})
-    table_tag = find_tag(main_div, 'table', attrs={'class': 'docutils'})
-    pdf_a4_tag = find_tag(
-        table_tag, 'a', {'href': re.compile(r'.+pdf-a4\.zip$')}
-    )
-    pdf_a4_link = pdf_a4_tag['href']
+    pdf_a4_link = soup.select_one(
+        'div table.docutils a[href$="a4.zip"]')['href']
     archive_url = urljoin(downloads_url, pdf_a4_link)
     filename = archive_url.split('/')[-1]
     download_dir = BASE_DIR / 'downloads'
