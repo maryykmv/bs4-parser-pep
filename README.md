@@ -19,6 +19,11 @@
 
 ## Как запустить проект
 
+- Клонировать репозиторий и перейти в него в командной строке:
+```
+git clone git@github.com:wildcat3333/bs4_parser_pep.git
+```
+
 - Переходим в директорию проекта
 ```
 cd bs4_parser_pep
@@ -45,8 +50,3 @@ pip install -r requirements.txt
 
 ## Автор проекта
 _[Мария Константинова](https://github.com/wildcat3333)_, python-developer
-
-___
-<p>
-    <span>© 2023, Contributors on git </span>
-</p>
