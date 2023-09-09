@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
 from constants import (
-    BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL, EXPECTED_STATUS, DOWNLOAD_DIR
+    BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL, EXPECTED_STATUS
 )
 from outputs import control_output
 from utils import get_response, find_tag, get_soup
@@ -125,13 +125,19 @@ def download(session):
     download_dir = BASE_DIR / 'downloads'
     download_dir.mkdir(exist_ok=True)
     archive_path = download_dir / filename
+    # Не могу изменить на контсанту тесты падают:
+    # FAILED tests/test_main.py::test_download -
+    # AssertionError: Убедитесь что для хранения архивов с
+    # документацией Python в директории `src` создаётся директория `downloads`
+    # DOWNLOAD_DIR.mkdir(exist_ok=True)
+    # archive_path = DOWNLOAD_DIR / filename
     with open('test.txt', 'w') as test_file:
         test_file.write('Hello World!')
 
     with open(archive_path, 'wb') as file:
         file.write(response.content)
     message = DOWNLOAD_RESULT.format(path=archive_path)
-    logging.info(message, stack_info=True)
+    logging.info(message)
 
 
 MODE_TO_FUNCTION = {

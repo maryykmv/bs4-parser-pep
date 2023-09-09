@@ -5,7 +5,8 @@ import logging
 from prettytable import PrettyTable
 
 from constants import (
-    BASE_DIR, DATETIME_FORMAT, CODE_PAGES, OUTPUT_PRETTY, OUTPUT_FILE, RESULTS_DIR, DEFAULT_OUTPUT
+    BASE_DIR, DATETIME_FORMAT, CODE_PAGES, OUTPUT_PRETTY,
+    OUTPUT_FILE, DEFAULT_OUTPUT
 )
 
 DOWNLOAD_RESULT = 'Файл с результатами был сохранён: {path}'
@@ -39,12 +40,18 @@ def pretty_output(results, cli_args=''):
 def file_output(results, cli_args):
     results_dir = BASE_DIR / 'results'
     results_dir.mkdir(exist_ok=True)
+    # Не могу изменить на контсанту тесты падают:
+    # FAILED tests/test_main.py::test_download -
+    # AssertionError: Убедитесь что для хранения архивов с
+    # документацией Python в директории `src` создаётся директория `results`
+    # RESULTS_DIR.mkdir(exist_ok=True)
+    # archive_path = RESULTS_DIR / filename
     parser_mode = cli_args.mode
     now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
     file_name = f'{parser_mode}_{now_formatted}.csv'
     file_path = results_dir / file_name
     with open(file_path, 'w', encoding=CODE_PAGES) as file:
-        writer = csv.writer(file, dialect='unix')
+        writer = csv.writer(file, dialect=csv.unix_dialect)
         writer.writerows(results)
     message = DOWNLOAD_RESULT.format(path=file_path)
     logging.info(message)
