@@ -1,12 +1,19 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
-DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
-MAIN_DOC_URL = 'https://docs.python.org/3/'
-PEP_DOC_URL = 'https://peps.python.org/'
+LOG_DIR = BASE_DIR / 'logs'
+LOG_FILE = LOG_DIR / 'parser.log'
 
+OUTPUT_PRETTY = 'pretty'
+OUTPUT_FILE = 'file'
+
+CODE_PAGES = 'utf-8'
+DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
 LOG_FORMAT = '"%(asctime)s - [%(levelname)s] - %(message)s"'
 DT_FORMAT = '%d.%m.%Y %H:%M:%S'
+
+MAIN_DOC_URL = 'https://docs.python.org/3/'
+PEP_DOC_URL = 'https://peps.python.org/'
 
 EXPECTED_STATUS = {
     'A': ('Active', 'Accepted'),
@@ -18,14 +25,3 @@ EXPECTED_STATUS = {
     'W': ('Withdrawn',),
     '': ('Draft', 'Active'),
 }
-
-ERROR_MESSAGE = (
-    '\nНесовпадающие статусы:'
-    '\n{pep_url}'
-    '\nСтатус в карточке:'
-    '\n{status}'
-    '\nОжидаемые статусы:'
-    '\n{expected_status}'
-)
-
-CODE_PAGES = 'utf-8'
