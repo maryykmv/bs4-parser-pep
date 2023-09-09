@@ -28,6 +28,7 @@ CMD_ARGS = 'Аргументы командной строки: {args}'
 
 MESSAGE_ERRORS = 'Произошел сбой: {error}'
 
+
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     soup = get_soup(session, whats_new_url)
@@ -109,12 +110,16 @@ def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
     response = get_response(session, downloads_url)
     soup = get_soup(session, downloads_url)
+
+    # pdf_a4_link = soup.select_one('div.main table.docutils > [href$=имя_файла]')['href']
+     
     main_div = find_tag(soup, 'div', attrs={'role': 'main'})
     table_tag = find_tag(main_div, 'table', attrs={'class': 'docutils'})
     pdf_a4_tag = find_tag(
         table_tag, 'a', {'href': re.compile(r'.+pdf-a4\.zip$')}
     )
     pdf_a4_link = pdf_a4_tag['href']
+
     archive_url = urljoin(downloads_url, pdf_a4_link)
     filename = archive_url.split('/')[-1]
     download_dir = BASE_DIR / 'downloads'
@@ -144,7 +149,7 @@ def main():
         arg_parser = configure_argument_parser(MODE_TO_FUNCTION.keys())
         args = arg_parser.parse_args()
         message = CMD_ARGS.format(args=args)
-        logging.info(message, stack_info=True)
+        logging.info(message)
         session = requests_cache.CachedSession()
         if args.clear_cache:
             session.cache.clear()
@@ -154,8 +159,9 @@ def main():
             control_output(results, args)
         logging.info('Парсер завершил работу.')
     except Exception as error:
-        message = ERROR_MESSAGE.format(error=error)
+        message = MESSAGE_ERRORS.format(error=error)
         logging.exception(message)
+
 
 if __name__ == '__main__':
     main()

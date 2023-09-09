@@ -8,6 +8,7 @@ RESULTS_DIR = BASE_DIR / 'results'
 
 OUTPUT_PRETTY = 'pretty'
 OUTPUT_FILE = 'file'
+DEFAULT_OUTPUT = None
 
 CODE_PAGES = 'utf-8'
 DATETIME_FORMAT = '%Y-%m-%d_%H-%M-%S'

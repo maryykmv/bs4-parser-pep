@@ -5,7 +5,7 @@ import logging
 from prettytable import PrettyTable
 
 from constants import (
-    BASE_DIR, DATETIME_FORMAT, CODE_PAGES, OUTPUT_PRETTY, OUTPUT_FILE, RESULTS_DIR
+    BASE_DIR, DATETIME_FORMAT, CODE_PAGES, OUTPUT_PRETTY, OUTPUT_FILE, RESULTS_DIR, DEFAULT_OUTPUT
 )
 
 DOWNLOAD_RESULT = 'Файл с результатами был сохранён: {path}'
@@ -13,20 +13,22 @@ DOWNLOAD_RESULT = 'Файл с результатами был сохранён:
 
 def control_output(results, cli_args):
     output = cli_args.output
-    if output == OUTPUT_PRETTY:
-        pretty_output(results)
-    elif output == OUTPUT_FILE:
-        file_output(results, cli_args)
-    else:
-        default_output(results)
+    output_names = [
+        [OUTPUT_PRETTY, pretty_output],
+        [OUTPUT_FILE, file_output],
+        [DEFAULT_OUTPUT, default_output]
+    ]
+    for output_type, output_function in output_names:
+        if output == output_type:
+            output_function(results, cli_args)
 
 
-def default_output(results):
+def default_output(results, cli_args=''):
     for row in results:
         print(*row)
 
 
-def pretty_output(results):
+def pretty_output(results, cli_args=''):
     table = PrettyTable()
     table.field_names = results[0]
     table.align = 'l'
@@ -45,4 +47,4 @@ def file_output(results, cli_args):
         writer = csv.writer(file, dialect='unix')
         writer.writerows(results)
     message = DOWNLOAD_RESULT.format(path=file_path)
-    logging.info(message, stack_info=True)
+    logging.info(message)
