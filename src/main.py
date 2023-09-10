@@ -9,7 +9,7 @@ from tqdm import tqdm
 from configs import configure_argument_parser, configure_logging
 from constants import (
     BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL, EXPECTED_STATUS, DOWNLOAD_DIR,
-    MODE_OPEN_DONLOWD
+    MODE_DOWNLOAD
 )
 from outputs import control_output
 from utils import get_response, find_tag, get_soup
@@ -39,26 +39,27 @@ PAGE_NAME_DOWNLOAD = 'download.html'
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, PATH_NAME_WHATS_NEW)
-    try:
-        soup = get_soup(session, whats_new_url)
-    except ValueError as error:
-        logging.error(CHECK_URL.format(url=whats_new_url, error=error))
+    soup = get_soup(session, whats_new_url)
     a_tags = soup.select(
         '#what-s-new-in-python div.toctree-wrapper '
         'li.toctree-l1 a[href$=".html"]'
     )
     results = [HEADER_WHATS_NEW]
+    messages_error = []
     for a_tag in tqdm(a_tags):
         version_link = urljoin(whats_new_url, a_tag['href'])
         try:
             soup = get_soup(session, version_link)
-        except ValueError as error:
-            logging.error(CHECK_URL.format(url=version_link, error=error))
+        except AttributeError as error:
+            messages_error.append(
+                CHECK_URL.format(url=version_link, error=error)
+            )
         results.append((
             version_link,
             find_tag(soup, 'h1').text,
             find_tag(soup, 'dl').text.replace('\n', '')
         ))
+    logging.error(messages_error)
     return results
 
 
@@ -90,13 +91,14 @@ def pep(session):
     )
     statuses = []
     messages = []
+    messages_error = []
     for a_tag in tqdm(a_tags):
         link = a_tag['href']
         pep_url = urljoin(PEP_DOC_URL, link)
         try:
             soup = get_soup(session, pep_url)
-        except ValueError as error:
-            logging.error(CHECK_URL.format(url=pep_url, error=error))
+        except AttributeError as error:
+            messages_error.append(CHECK_URL.format(url=pep_url, error=error))
         abbr_tags = find_tag(soup, 'abbr')
         status = abbr_tags.text
         abbreviation_status = status[0]
@@ -107,6 +109,7 @@ def pep(session):
                 status=status,
                 expected_status=EXPECTED_STATUS[abbreviation_status]
             ))
+    logging.error(messages_error)
     logging.warning(messages)
     counter = Counter(statuses)
     results = [
@@ -128,7 +131,7 @@ def download(session):
     download_dir = BASE_DIR / DOWNLOAD_DIR
     download_dir.mkdir(exist_ok=True)
     archive_path = download_dir / filename
-    with open(archive_path, MODE_OPEN_DONLOWD) as file:
+    with open(archive_path, MODE_DOWNLOAD) as file:
         file.write(response.content)
     message = DOWNLOAD_RESULT.format(path=archive_path)
     logging.info(message)

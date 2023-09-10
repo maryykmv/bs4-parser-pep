@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from requests import RequestException
 
-from constants import CODE_PAGES, FEATURE
+from constants import CODE_PAGES
 from exceptions import ParserFindTagException
 
 ERROR_PAGE = 'Возникла ошибка при загрузке страницы {url} {error}'
@@ -17,7 +17,7 @@ def get_response(session, url, encode=CODE_PAGES):
         raise ConnectionError(ERROR_PAGE.format(url=url, error=error))
 
 
-def get_soup(session, url, feature=FEATURE):
+def get_soup(session, url, feature='lxml'):
     return BeautifulSoup(get_response(session, url).text, feature)
 
 
