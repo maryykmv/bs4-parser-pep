@@ -41,8 +41,8 @@ def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, PATH_NAME_WHATS_NEW)
     try:
         soup = get_soup(session, whats_new_url)
-    except Exception as error:
-        raise ValueError(CHECK_URL.format(url=whats_new_url, error=error))
+    except ValueError as error:
+        logging.error(CHECK_URL.format(url=whats_new_url, error=error))
     a_tags = soup.select(
         '#what-s-new-in-python div.toctree-wrapper '
         'li.toctree-l1 a[href$=".html"]'
@@ -52,8 +52,8 @@ def whats_new(session):
         version_link = urljoin(whats_new_url, a_tag['href'])
         try:
             soup = get_soup(session, version_link)
-        except Exception as error:
-            raise ValueError(CHECK_URL.format(url=version_link, error=error))
+        except ValueError as error:
+            logging.error(CHECK_URL.format(url=version_link, error=error))
         results.append((
             version_link,
             find_tag(soup, 'h1').text,
@@ -63,10 +63,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    try:
-        soup = get_soup(session, MAIN_DOC_URL)
-    except Exception as error:
-        raise ValueError(CHECK_URL.format(url=MAIN_DOC_URL, error=error))
+    soup = get_soup(session, MAIN_DOC_URL)
     ul_tags = soup.select('div.sphinxsidebarwrapper ul')
     for ul in ul_tags:
         if 'All versions' in ul.text:
@@ -87,33 +84,30 @@ def latest_versions(session):
 
 
 def pep(session):
-    try:
-        soup = get_soup(session, PEP_DOC_URL)
-    except Exception as error:
-        raise ValueError(CHECK_URL.format(url=PEP_DOC_URL, error=error))
+    soup = get_soup(session, PEP_DOC_URL)
     a_tags = soup.select(
         '#numerical-index a.pep.reference.internal'
     )
     statuses = []
-    message = []
+    messages = []
     for a_tag in tqdm(a_tags):
         link = a_tag['href']
         pep_url = urljoin(PEP_DOC_URL, link)
         try:
             soup = get_soup(session, pep_url)
-        except Exception as error:
-            raise ValueError(CHECK_URL.format(url=pep_url, error=error))
+        except ValueError as error:
+            logging.error(CHECK_URL.format(url=pep_url, error=error))
         abbr_tags = find_tag(soup, 'abbr')
         status = abbr_tags.text
         abbreviation_status = status[0]
         statuses.append(status)
         if status not in EXPECTED_STATUS[abbreviation_status]:
-            message.append(ERROR_PEP_STATUS.format(
+            messages.append(ERROR_PEP_STATUS.format(
                 pep_url=pep_url,
                 status=status,
                 expected_status=EXPECTED_STATUS[abbreviation_status]
             ))
-    logging.warning(message)
+    logging.warning(messages)
     counter = Counter(statuses)
     results = [
             (HEADER_PEP),
