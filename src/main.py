@@ -23,7 +23,7 @@ ERROR_PEP_STATUS = (
     '\n{expected_status}'
 )
 
-CHECK_URL = 'Возникла ошибка при загрузке страницы {url}'
+CHECK_URL = 'Возникла ошибка при загрузке страницы {soup} {url}'
 DOWNLOAD_RESULT = 'Архив был загружен и сохранён: {path}'
 CMD_ARGS = 'Аргументы командной строки: {args}'
 PARSER_START = 'Парсер запущен!'
@@ -50,9 +50,9 @@ def whats_new(session):
         version_link = urljoin(whats_new_url, a_tag['href'])
         try:
             soup = get_soup(session, version_link)
-        except AttributeError as error:
+        except ConnectionError as error:
             messages_error.append(
-                CHECK_URL.format(url=version_link, error=error)
+                CHECK_URL.format(soup=soup, url=version_link, error=error)
             )
         results.append((
             version_link,
@@ -97,8 +97,10 @@ def pep(session):
         pep_url = urljoin(PEP_DOC_URL, link)
         try:
             soup = get_soup(session, pep_url)
-        except AttributeError as error:
-            messages_error.append(CHECK_URL.format(url=pep_url, error=error))
+        except ConnectionError as error:
+            messages_error.append(
+                CHECK_URL.format(soup=soup, url=pep_url, error=error)
+            )
         abbr_tags = find_tag(soup, 'abbr')
         status = abbr_tags.text
         abbreviation_status = status[0]
