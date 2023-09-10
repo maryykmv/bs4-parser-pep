@@ -4,21 +4,21 @@ from requests import RequestException
 from constants import CODE_PAGES, FEATURE
 from exceptions import ParserFindTagException
 
-ERROR_PAGE = 'Возникла ошибка при загрузке страницы {url}'
+ERROR_PAGE = 'Возникла ошибка при загрузке страницы {url} {error}'
 ERROR_TAG = 'Не найден тег {tag} {attrs}'
 
 
-def get_response(session, url):
+def get_response(session, url, encode=CODE_PAGES):
     try:
         response = session.get(url)
-        response.encoding = CODE_PAGES
+        response.encoding = encode
         return response
     except RequestException as error:
         raise ConnectionError(ERROR_PAGE.format(url=url, error=error))
 
 
-def get_soup(session, url):
-    return BeautifulSoup(get_response(session, url).text, FEATURE)
+def get_soup(session, url, feature=FEATURE):
+    return BeautifulSoup(get_response(session, url).text, feature)
 
 
 def find_tag(soup, tag, attrs=None):

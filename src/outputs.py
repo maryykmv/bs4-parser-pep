@@ -11,15 +11,6 @@ from constants import (
 )
 
 DOWNLOAD_RESULT = 'Файл с результатами был сохранён: {path}'
-OUTPUT_NAMES = {
-        OUTPUT_PRETTY: 'pretty_output',
-        OUTPUT_FILE: 'file_output',
-        DEFAULT_OUTPUT: 'default_output'
-}
-
-
-def control_output(results, cli_args):
-    eval(OUTPUT_NAMES[cli_args.output])(results, cli_args)
 
 
 def default_output(results, cli_args=''):
@@ -43,5 +34,21 @@ def file_output(results, cli_args):
     file_name = f'{parser_mode}_{now_formatted}.{FILE_FORMAT}'
     file_path = results_dir / file_name
     with open(file_path, MODE_OPEN_FILE, encoding=CODE_PAGES) as file:
-        csv.writer(file, dialect=csv.unix_dialect).writerows(results)
+        csv.writer(
+            file,
+            dialect=csv.unix_dialect
+        ).writerows(
+            results
+        )
     logging.info(DOWNLOAD_RESULT.format(path=file_path))
+
+
+OUTPUT_NAMES = {
+    OUTPUT_PRETTY: pretty_output,
+    OUTPUT_FILE: file_output,
+    DEFAULT_OUTPUT: default_output
+}
+
+
+def control_output(results, cli_args):
+    OUTPUT_NAMES[cli_args.output](results, cli_args)
