@@ -8,7 +8,8 @@ from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
 from constants import (
-    BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL, EXPECTED_STATUS, DOWNLOAD_DIR
+    BASE_DIR, MAIN_DOC_URL, PEP_DOC_URL, EXPECTED_STATUS, DOWNLOAD_DIR,
+    MODE_OPEN_DONLOWD
 )
 from outputs import control_output
 from utils import get_response, find_tag, get_soup
@@ -42,17 +43,13 @@ def whats_new(session):
         soup = get_soup(session, whats_new_url)
     except Exception as error:
         raise ValueError(CHECK_URL.format(url=whats_new_url, error=error))
-    sections_by_python = soup.select(
-        '#what-s-new-in-python div.toctree-wrapper li.toctree-l1'
-    )
     a_tags = soup.select(
-        '#what-s-new-in-python div.toctree-wrapper li.toctree-l1 a'
+        '#what-s-new-in-python div.toctree-wrapper '
+        'li.toctree-l1 a[href$=".html"]'
     )
     results = [HEADER_WHATS_NEW]
-    for section in tqdm(sections_by_python):
-        version_a_tag = find_tag(section, 'a')
-        href = version_a_tag['href']
-        version_link = urljoin(whats_new_url, href)
+    for a_tag in tqdm(a_tags):
+        version_link = urljoin(whats_new_url, a_tag['href'])
         try:
             soup = get_soup(session, version_link)
         except Exception as error:
@@ -70,8 +67,7 @@ def latest_versions(session):
         soup = get_soup(session, MAIN_DOC_URL)
     except Exception as error:
         raise ValueError(CHECK_URL.format(url=MAIN_DOC_URL, error=error))
-    sidebar = find_tag(soup, 'div', {'class': 'sphinxsidebarwrapper'})
-    ul_tags = sidebar.find_all('ul')
+    ul_tags = soup.select('div.sphinxsidebarwrapper ul')
     for ul in ul_tags:
         if 'All versions' in ul.text:
             a_tags = ul.find_all('a')
@@ -95,8 +91,9 @@ def pep(session):
         soup = get_soup(session, PEP_DOC_URL)
     except Exception as error:
         raise ValueError(CHECK_URL.format(url=PEP_DOC_URL, error=error))
-    main_div = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
-    a_tags = main_div.find_all('a', attrs={'class': 'pep reference internal'})
+    a_tags = soup.select(
+        '#numerical-index a.pep.reference.internal'
+    )
     statuses = []
     message = []
     for a_tag in tqdm(a_tags):
@@ -137,7 +134,7 @@ def download(session):
     download_dir = BASE_DIR / DOWNLOAD_DIR
     download_dir.mkdir(exist_ok=True)
     archive_path = download_dir / filename
-    with open(archive_path, 'wb') as file:
+    with open(archive_path, MODE_OPEN_DONLOWD) as file:
         file.write(response.content)
     message = DOWNLOAD_RESULT.format(path=archive_path)
     logging.info(message)

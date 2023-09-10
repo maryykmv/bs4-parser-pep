@@ -6,7 +6,8 @@ from prettytable import PrettyTable
 
 from constants import (
     BASE_DIR, DATETIME_FORMAT, CODE_PAGES, OUTPUT_PRETTY,
-    OUTPUT_FILE, DEFAULT_OUTPUT
+    OUTPUT_FILE, DEFAULT_OUTPUT, RESULTS_DIR, FILE_FORMAT,
+    MODE_OPEN_FILE
 )
 
 DOWNLOAD_RESULT = 'Файл с результатами был сохранён: {path}'
@@ -35,33 +36,12 @@ def pretty_output(results, cli_args=''):
 
 
 def file_output(results, cli_args):
-    results_dir = BASE_DIR / 'results'
+    results_dir = BASE_DIR / RESULTS_DIR
     results_dir.mkdir(exist_ok=True)
-    # Не могу изменить на контсанту тесты падают:
-    # FAILED tests/test_main.py::test_download -
-    # AssertionError: Убедитесь что для хранения архивов с
-    # документацией Python в директории `src` создаётся директория `results`
-    # RESULTS_DIR.mkdir(exist_ok=True)
-    # archive_path = RESULTS_DIR / filename
     parser_mode = cli_args.mode
-    # Не могу изменить на контсанту тесты падают: пока
-    # сюда дойдет пройдут секунды
-    # из-за этого падают тесты
-    # E       AssertionError: Убедитесь что имя файла соотвествует
-    # паттерну <имя-режима_дата_в_формате_%Y-%m-%d_%H-%M-%S>.csv
-    # E         С форматами кодов вы можете познакомиться тут -
-    # E https://docs.python.org/3/library/datetime.html?highlight=strftime
-    # #strftime-and-strptime-format-codes
-    # E assert 'pep_2023-09-10_01-20-27.csv' == 'pep_2023-09-10_01-20-33.csv'
-    # E - pep_2023-09-10_01-20-33.csv
-    # E ?                      ^^
-    # E + pep_2023-09-10_01-20-27.csv
-    # E ?
     now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
-    file_name = f'{parser_mode}_{now_formatted}.csv'
+    file_name = f'{parser_mode}_{now_formatted}.{FILE_FORMAT}'
     file_path = results_dir / file_name
-    with open(file_path, 'w', encoding=CODE_PAGES) as file:
-        writer = csv.writer(file, dialect=csv.unix_dialect)
-        writer.writerows(results)
-    message = DOWNLOAD_RESULT.format(path=file_path)
-    logging.info(message)
+    with open(file_path, MODE_OPEN_FILE, encoding=CODE_PAGES) as file:
+        csv.writer(file, dialect=csv.unix_dialect).writerows(results)
+    logging.info(DOWNLOAD_RESULT.format(path=file_path))
