@@ -10,18 +10,15 @@ from constants import (
 )
 
 DOWNLOAD_RESULT = 'Файл с результатами был сохранён: {path}'
+OUTPUT_NAMES = {
+        OUTPUT_PRETTY: 'pretty_output',
+        OUTPUT_FILE: 'file_output',
+        DEFAULT_OUTPUT: 'default_output'
+}
 
 
 def control_output(results, cli_args):
-    output = cli_args.output
-    output_names = [
-        [OUTPUT_PRETTY, pretty_output],
-        [OUTPUT_FILE, file_output],
-        [DEFAULT_OUTPUT, default_output]
-    ]
-    for output_type, output_function in output_names:
-        if output == output_type:
-            output_function(results, cli_args)
+    eval(OUTPUT_NAMES[cli_args.output])(results, cli_args)
 
 
 def default_output(results, cli_args=''):
