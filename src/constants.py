@@ -3,8 +3,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 LOG_DIR = BASE_DIR / 'logs'
 LOG_FILE = LOG_DIR / 'parser.log'
-DOWNLOAD_DIR = BASE_DIR / 'downloads'
-RESULTS_DIR = BASE_DIR / 'results'
+DOWNLOAD_DIR = 'downloads'
+RESULTS_DIR = 'results'
 
 OUTPUT_PRETTY = 'pretty'
 OUTPUT_FILE = 'file'
