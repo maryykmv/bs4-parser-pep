@@ -51,19 +51,15 @@ def whats_new(session):
         try:
             soup = get_soup(session, version_link)
         except ConnectionError as error:
-            messages_error.append(
-                CHECK_URL.format(
-                    session=session,
-                    url=version_link,
-                    a_tag=a_tag,
-                    error=error)
-            )
+            messages_error.append(CHECK_URL.format(error=error))
+            continue
         results.append((
             version_link,
             find_tag(soup, 'h1').text,
             find_tag(soup, 'dl').text.replace('\n', '')
         ))
-    logging.error(messages_error)
+    for message in messages_error:
+        logging.error(message)
     return results
 
 
@@ -102,13 +98,8 @@ def pep(session):
         try:
             soup = get_soup(session, pep_url)
         except ConnectionError as error:
-            messages_error.append(
-                CHECK_URL.format(
-                    session=session,
-                    url=pep_url,
-                    a_tag=a_tag,
-                    error=error)
-            )
+            messages_error.append(CHECK_URL.format(error=error))
+            continue
         abbr_tags = find_tag(soup, 'abbr')
         status = abbr_tags.text
         abbreviation_status = status[0]
@@ -119,12 +110,14 @@ def pep(session):
                 status=status,
                 expected_status=EXPECTED_STATUS[abbreviation_status]
             ))
-    logging.error(messages_error)
-    logging.warning(messages)
+    for message in messages_error:
+        logging.error(message)
+    for message in messages:
+        logging.warning(message)
     counter = Counter(statuses)
     results = [
-            HEADER_PEP,
-            *counter.items(),
+        HEADER_PEP,
+        *counter.items(),
     ]
     results.append(('Итого:', len(statuses)))
     return results
