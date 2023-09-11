@@ -23,7 +23,7 @@ ERROR_PEP_STATUS = (
     '\n{expected_status}'
 )
 
-CHECK_URL = 'Возникла ошибка при загрузке страницы {soup} {url}'
+CHECK_URL = 'Возникла ошибка при загрузке страницы {session} {url} {a_tag}'
 DOWNLOAD_RESULT = 'Архив был загружен и сохранён: {path}'
 CMD_ARGS = 'Аргументы командной строки: {args}'
 PARSER_START = 'Парсер запущен!'
@@ -52,7 +52,11 @@ def whats_new(session):
             soup = get_soup(session, version_link)
         except ConnectionError as error:
             messages_error.append(
-                CHECK_URL.format(soup=soup, url=version_link, error=error)
+                CHECK_URL.format(
+                    session=session,
+                    url=version_link,
+                    a_tag=a_tag,
+                    error=error)
             )
         results.append((
             version_link,
@@ -99,7 +103,11 @@ def pep(session):
             soup = get_soup(session, pep_url)
         except ConnectionError as error:
             messages_error.append(
-                CHECK_URL.format(soup=soup, url=pep_url, error=error)
+                CHECK_URL.format(
+                    session=session,
+                    url=pep_url,
+                    a_tag=a_tag,
+                    error=error)
             )
         abbr_tags = find_tag(soup, 'abbr')
         status = abbr_tags.text
@@ -115,7 +123,7 @@ def pep(session):
     logging.warning(messages)
     counter = Counter(statuses)
     results = [
-            (HEADER_PEP),
+            HEADER_PEP,
             *counter.items(),
     ]
     results.append(('Итого:', len(statuses)))
