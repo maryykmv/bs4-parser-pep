@@ -21,7 +21,7 @@
 
 - Клонировать репозиторий и перейти в него в командной строке:
 ```
-git clone git@github.com:wildcat3333/bs4_parser_pep.git
+git clone git@github.com:maryykmv/bs4_parser_pep.git
 ```
 
 - Переходим в директорию проекта
@@ -49,4 +49,4 @@ pip install -r requirements.txt
 
 
 ## Автор проекта
-_[Мария Константинова](https://github.com/wildcat3333)_, python-developer
+_[Мария Константинова](https://github.com/maryykmv)_, python-developer
